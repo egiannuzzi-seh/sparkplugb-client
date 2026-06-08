@@ -46,44 +46,84 @@ type Payload struct {
 	Metrics   []Metric
 }
 
+func encodeMetadata(m Metadata) *sproto.Payload_MetaData {
+	return &sproto.Payload_MetaData{
+		IsMultiPart: proto.Bool(m.IsMultiPart),
+		ContentType: proto.String(m.ContentType),
+		Size:        proto.Uint64(m.Size),
+		Seq:         proto.Uint64(m.Seq),
+		FileName:    proto.String(m.FileName),
+		FileType:    proto.String(m.FileType),
+		Md5:         proto.String(m.Md5),
+		Description: proto.String(m.Description),
+	}
+}
+
+func decodeMetadata(md *sproto.Payload_MetaData) Metadata {
+	if md == nil {
+		return Metadata{}
+	}
+
+	return Metadata{
+		IsMultiPart: md.GetIsMultiPart(),
+		ContentType: md.GetContentType(),
+		Size:        md.GetSize(),
+		Seq:         md.GetSeq(),
+		FileName:    md.GetFileName(),
+		FileType:    md.GetFileType(),
+		Md5:         md.GetMd5(),
+		Description: md.GetDescription(),
+	}
+}
+
 func (p *Payload) EncodePayload(isDeathPayload bool) ([]byte, error) {
 	now := time.Now().UnixMilli()
 	ms := []*sproto.Payload_Metric{}
 
 	for i, m := range p.Metrics {
 		sm := sproto.Payload_Metric{}
+
 		sm.Name = &p.Metrics[i].Name
+
 		dt := m.DataType.toUint32()
 		sm.Datatype = &dt
-		/**********************************
-		TypeInt DataType = 10
-		TypeFloat DataType = 12
-		TypeBool DataType = 14
-		TypeString DataType = 15
-		**********************************/
+		sm.IsHistorical = proto.Bool(m.IsHistorical)
+		sm.Metadata = encodeMetadata(m.Metadata)
+
 		switch m.DataType {
 		case TypeInt:
 			iv, err := strconv.ParseUint(m.Value, 10, 64)
 			if err != nil {
 				return nil, err
 			}
-			sm.Value = &sproto.Payload_Metric_IntValue{IntValue: uint32(iv)}
+			sm.Value = &sproto.Payload_Metric_IntValue{
+				IntValue: uint32(iv),
+			}
+
 		case TypeFloat:
 			fv, err := strconv.ParseFloat(m.Value, 32)
 			if err != nil {
 				return nil, err
 			}
-			sm.Value = &sproto.Payload_Metric_FloatValue{FloatValue: float32(fv)}
+			sm.Value = &sproto.Payload_Metric_FloatValue{
+				FloatValue: float32(fv),
+			}
+
 		case TypeBool:
 			bv, err := strconv.ParseBool(m.Value)
 			if err != nil {
 				return nil, err
 			}
-			sm.Value = &sproto.Payload_Metric_BooleanValue{BooleanValue: bv}
+			sm.Value = &sproto.Payload_Metric_BooleanValue{
+				BooleanValue: bv,
+			}
+
 		case TypeString:
-			sm.Value = &sproto.Payload_Metric_StringValue{StringValue: m.Value}
+			sm.Value = &sproto.Payload_Metric_StringValue{
+				StringValue: m.Value,
+			}
 		}
-		//fmt.Println(*sm.Name, "=", sm.Value)
+
 		ms = append(ms, &sm)
 	}
 	//fmt.Println("---------")

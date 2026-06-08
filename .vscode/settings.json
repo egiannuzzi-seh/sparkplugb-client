@@ -1,0 +1,23 @@
+{
+    // Formatting
+    "protobuf.formatOnSave": true,
+    "protobuf.formatter.alignFields": true,
+    // Import search paths
+    "protobuf.includes": [
+        "${workspaceFolder}/sproto"
+    ],
+    // Protoc tool and outputs
+    "protobuf.protoc.path": "/usr/bin/protoc",
+    "protobuf.protoc.options": [
+        "--proto_path=${workspaceFolder}",
+        "--go_out=${workspaceFolder}/gen/go",
+        "--go_opt=paths=source_relative",
+    ],
+    // Linting (Buf) on save
+    "protobuf.externalLinter.enabled": true,
+    "protobuf.externalLinter.linter": "buf",
+    "protobuf.externalLinter.runOnSave": true,
+    // IntelliSense/hover polish
+    "protobuf.completion.autoImport": true,
+    "protobuf.hover.showDocumentation": true,
+}

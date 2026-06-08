@@ -1,7 +1,9 @@
 /*
 Sparkplug 3.0.0
 Note: Complies to v3.0.0 of the Sparkplug specification
-      to the extent needed for Winsonic DataIO and other industrial 4.0 products.
+
+	to the extent needed for Winsonic DataIO and other industrial 4.0 products.
+
 Copyright (c) 2023 Winsonic Electronics, Taiwan
 @author David Lee
 
@@ -13,6 +15,17 @@ package sparkplug
 
 import "fmt"
 
+type Metadata struct {
+	IsMultiPart bool
+	ContentType string
+	Size        uint64
+	Seq         uint64
+	FileName    string
+	FileType    string
+	Md5         string
+	Description string
+}
+
 type Metric struct {
 	Name     string
 	DataType DataType
@@ -20,7 +33,9 @@ type Metric struct {
 	// FloatValue  float32
 	// BoolValue   bool
 	// StringValue string
-	Value string
+	Value        string
+	IsHistorical bool
+	Metadata     Metadata
 }
 
 type DataType uint32

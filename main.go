@@ -19,7 +19,7 @@ import (
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/weekaung/sparkplugb-client/sparkplug"
+	"github.com/egiannuzzi-seh/sparkplugb-client/sparkplug"
 )
 
 // ******************************************************************************

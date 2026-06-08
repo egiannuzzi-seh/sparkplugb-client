@@ -18,7 +18,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/weekaung/sparkplugb-client/sproto"
+	"github.com/egiannuzzi-seh/sparkplugb-client/sproto"
 	"google.golang.org/protobuf/proto"
 )
 

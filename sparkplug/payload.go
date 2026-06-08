@@ -150,18 +150,29 @@ func (p *Payload) DecodePayload(bytes []byte) error {
 	}
 	p.Metrics = make([]Metric, len(pl.Metrics))
 	for i := range pl.Metrics {
-		p.Metrics[i].Name = *pl.Metrics[i].Name
-		p.Metrics[i].DataType = DataType(*pl.Metrics[i].Datatype)
-		// Set the Value according to DataType
+		pm := pl.Metrics[i]
+
+		p.Metrics[i].Name = pm.GetName()
+		p.Metrics[i].DataType = DataType(pm.GetDatatype())
+		p.Metrics[i].IsHistorical = pm.GetIsHistorical()
+		p.Metrics[i].Metadata = decodeMetadata(pm.GetMetadata())
+
 		switch p.Metrics[i].DataType {
 		case TypeInt:
-			p.Metrics[i].Value = strconv.FormatUint(uint64(pl.Metrics[i].GetIntValue()), 10)
+			p.Metrics[i].Value =
+				strconv.FormatUint(uint64(pm.GetIntValue()), 10)
+
 		case TypeFloat:
-			p.Metrics[i].Value = fmt.Sprintf("%f", pl.Metrics[i].GetFloatValue())
+			p.Metrics[i].Value =
+				fmt.Sprintf("%f", pm.GetFloatValue())
+
 		case TypeBool:
-			p.Metrics[i].Value = strconv.FormatBool(pl.Metrics[i].GetBooleanValue())
+			p.Metrics[i].Value =
+				strconv.FormatBool(pm.GetBooleanValue())
+
 		case TypeString:
-			p.Metrics[i].Value = pl.Metrics[i].GetStringValue()
+			p.Metrics[i].Value =
+				pm.GetStringValue()
 		}
 	}
 	return nil

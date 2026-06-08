@@ -1,4 +1,4 @@
-module github.com/weekaung/sparkplugb-client
+module github.com/egiannuzzi-seh/sparkplugb-client
 
 go 1.17
 

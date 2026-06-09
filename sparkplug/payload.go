@@ -14,7 +14,6 @@ Copyright (c) 2023 Winsonic Electronics, Taiwan
 package sparkplug
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -78,12 +77,14 @@ func decodeMetadata(md *sproto.Payload_MetaData) Metadata {
 
 func (p *Payload) EncodePayload(isDeathPayload bool) ([]byte, error) {
 	now := time.Now().UnixMilli()
-	ms := []*sproto.Payload_Metric{}
+	ms := make([]*sproto.Payload_Metric, 0, len(p.Metrics))
 
-	for i, m := range p.Metrics {
-		sm := sproto.Payload_Metric{}
+	for i := range p.Metrics {
+		// Use reference to avoid copying the struct
+		m := &p.Metrics[i]
+		sm := &sproto.Payload_Metric{}
 
-		sm.Name = &p.Metrics[i].Name
+		sm.Name = &m.Name
 
 		dt := m.DataType.toUint32()
 		sm.Datatype = &dt
@@ -91,88 +92,136 @@ func (p *Payload) EncodePayload(isDeathPayload bool) ([]byte, error) {
 		sm.Metadata = encodeMetadata(m.Metadata)
 
 		switch m.DataType {
-		case TypeInt:
-			iv, err := strconv.ParseUint(m.Value, 10, 64)
+		case TypeInt8:
+			v, err := strconv.ParseInt(m.Value, 10, 8)
 			if err != nil {
 				return nil, err
 			}
-			sm.Value = &sproto.Payload_Metric_IntValue{
-				IntValue: uint32(iv),
+			sm.Value = &sproto.Payload_Metric_IntValue{IntValue: uint32(v)}
+
+		case TypeInt16:
+			v, err := strconv.ParseInt(m.Value, 10, 16)
+			if err != nil {
+				return nil, err
 			}
+			sm.Value = &sproto.Payload_Metric_IntValue{IntValue: uint32(v)}
+
+		case TypeInt32:
+			v, err := strconv.ParseInt(m.Value, 10, 32)
+			if err != nil {
+				return nil, err
+			}
+			sm.Value = &sproto.Payload_Metric_IntValue{IntValue: uint32(v)}
+
+		case TypeUInt8:
+			v, err := strconv.ParseUint(m.Value, 10, 8)
+			if err != nil {
+				return nil, err
+			}
+			sm.Value = &sproto.Payload_Metric_IntValue{IntValue: uint32(v)}
+
+		case TypeUInt16:
+			v, err := strconv.ParseUint(m.Value, 10, 16)
+			if err != nil {
+				return nil, err
+			}
+			sm.Value = &sproto.Payload_Metric_IntValue{IntValue: uint32(v)}
+
+		case TypeUInt32:
+			v, err := strconv.ParseUint(m.Value, 10, 32)
+			if err != nil {
+				return nil, err
+			}
+			sm.Value = &sproto.Payload_Metric_IntValue{IntValue: uint32(v)}
+
+		case TypeInt64:
+			v, err := strconv.ParseInt(m.Value, 10, 64)
+			if err != nil {
+				return nil, err
+			}
+			sm.Value = &sproto.Payload_Metric_LongValue{LongValue: uint64(v)}
+
+		case TypeUInt64:
+			v, err := strconv.ParseUint(m.Value, 10, 64)
+			if err != nil {
+				return nil, err
+			}
+			sm.Value = &sproto.Payload_Metric_LongValue{LongValue: v}
 
 		case TypeFloat:
-			fv, err := strconv.ParseFloat(m.Value, 32)
+			v, err := strconv.ParseFloat(m.Value, 32)
 			if err != nil {
 				return nil, err
 			}
-			sm.Value = &sproto.Payload_Metric_FloatValue{
-				FloatValue: float32(fv),
-			}
+			sm.Value = &sproto.Payload_Metric_FloatValue{FloatValue: float32(v)}
 
 		case TypeBool:
-			bv, err := strconv.ParseBool(m.Value)
+			v, err := strconv.ParseBool(m.Value)
 			if err != nil {
 				return nil, err
 			}
-			sm.Value = &sproto.Payload_Metric_BooleanValue{
-				BooleanValue: bv,
-			}
+			sm.Value = &sproto.Payload_Metric_BooleanValue{BooleanValue: v}
 
 		case TypeString:
-			sm.Value = &sproto.Payload_Metric_StringValue{
-				StringValue: m.Value,
-			}
+			sm.Value = &sproto.Payload_Metric_StringValue{StringValue: m.Value}
 		}
 
-		ms = append(ms, &sm)
+		ms = append(ms, sm)
 	}
-	//fmt.Println("---------")
 
 	sp := sproto.Payload{}
 
 	if !isDeathPayload {
-		// Set Payload timestamp
 		tn := uint64(now)
 		sp.Timestamp = &tn
-		// Set Payload sequence
 		sp.Seq = &p.Seq
 	}
+
 	sp.Metrics = ms
 	return proto.Marshal(&sp)
 }
 
 func (p *Payload) DecodePayload(bytes []byte) error {
 	pl := sproto.Payload{}
-	proto.Unmarshal(bytes, &pl)
-	// fmt.Println("Payload is ", pl.String())
+	if err := proto.Unmarshal(bytes, &pl); err != nil {
+		return err
+	}
+
 	if pl.Timestamp != nil {
 		p.Timestamp = time.UnixMilli(int64(*pl.Timestamp))
 	}
-	p.Metrics = make([]Metric, len(pl.Metrics))
-	for i := range pl.Metrics {
-		pm := pl.Metrics[i]
 
+	p.Metrics = make([]Metric, len(pl.Metrics))
+
+	for i, pm := range pl.Metrics {
 		p.Metrics[i].Name = pm.GetName()
 		p.Metrics[i].DataType = DataType(pm.GetDatatype())
 		p.Metrics[i].IsHistorical = pm.GetIsHistorical()
 		p.Metrics[i].Metadata = decodeMetadata(pm.GetMetadata())
 
 		switch p.Metrics[i].DataType {
-		case TypeInt:
-			p.Metrics[i].Value =
-				strconv.FormatUint(uint64(pm.GetIntValue()), 10)
-
+		case TypeInt8:
+			p.Metrics[i].Value = strconv.FormatInt(int64(int8(pm.GetIntValue())), 10)
+		case TypeInt16:
+			p.Metrics[i].Value = strconv.FormatInt(int64(int16(pm.GetIntValue())), 10)
+		case TypeInt32:
+			p.Metrics[i].Value = strconv.FormatInt(int64(int32(pm.GetIntValue())), 10)
+		case TypeUInt8:
+			p.Metrics[i].Value = strconv.FormatUint(uint64(uint8(pm.GetIntValue())), 10)
+		case TypeUInt16:
+			p.Metrics[i].Value = strconv.FormatUint(uint64(uint16(pm.GetIntValue())), 10)
+		case TypeUInt32:
+			p.Metrics[i].Value = strconv.FormatUint(uint64(pm.GetIntValue()), 10)
+		case TypeInt64:
+			p.Metrics[i].Value = strconv.FormatInt(int64(pm.GetLongValue()), 10)
+		case TypeUInt64:
+			p.Metrics[i].Value = strconv.FormatUint(pm.GetLongValue(), 10)
 		case TypeFloat:
-			p.Metrics[i].Value =
-				fmt.Sprintf("%f", pm.GetFloatValue())
-
+			p.Metrics[i].Value = strconv.FormatFloat(float64(pm.GetFloatValue()), 'f', -1, 32)
 		case TypeBool:
-			p.Metrics[i].Value =
-				strconv.FormatBool(pm.GetBooleanValue())
-
+			p.Metrics[i].Value = strconv.FormatBool(pm.GetBooleanValue())
 		case TypeString:
-			p.Metrics[i].Value =
-				pm.GetStringValue()
+			p.Metrics[i].Value = pm.GetStringValue()
 		}
 	}
 	return nil

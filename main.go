@@ -227,12 +227,12 @@ func getDeviceBirthMetrics() []sparkplug.Metric {
 	}
 	m5 := sparkplug.Metric{
 		Name:     "Battery Level",
-		DataType: sparkplug.TypeInt,
+		DataType: sparkplug.TypeInt32,
 		Value:    "100",
 	}
 	m6 := sparkplug.Metric{
 		Name:     "zb/onoff",
-		DataType: sparkplug.TypeInt,
+		DataType: sparkplug.TypeInt32,
 		Value:    "0",
 	}
 	ms := []sparkplug.Metric{}
@@ -249,12 +249,12 @@ func getDeviceBirthMetrics() []sparkplug.Metric {
 func getDeviceDataMetrics_1() []sparkplug.Metric {
 	m5 := sparkplug.Metric{
 		Name:     "Battery Level",
-		DataType: sparkplug.TypeInt,
+		DataType: sparkplug.TypeInt32,
 		Value:    "90",
 	}
 	m6 := sparkplug.Metric{
 		Name:     "zb/onoff",
-		DataType: sparkplug.TypeInt,
+		DataType: sparkplug.TypeInt32,
 		Value:    "1",
 	}
 	ms := []sparkplug.Metric{}
@@ -267,7 +267,7 @@ func getDeviceDataMetrics_1() []sparkplug.Metric {
 func getDeviceDataMetrics_2() []sparkplug.Metric {
 	m6 := sparkplug.Metric{
 		Name:     "zb/onoff",
-		DataType: sparkplug.TypeInt,
+		DataType: sparkplug.TypeInt32,
 		Value:    "0",
 	}
 	ms := []sparkplug.Metric{}

@@ -41,7 +41,14 @@ type Metric struct {
 type DataType uint32
 
 const (
-	TypeInt    DataType = 3
+	TypeInt8   DataType = 1
+	TypeInt16  DataType = 2
+	TypeInt32  DataType = 3
+	TypeInt64  DataType = 4
+	TypeUInt8  DataType = 5
+	TypeUInt16 DataType = 6
+	TypeUInt32 DataType = 7
+	TypeUInt64 DataType = 8
 	TypeFloat  DataType = 9
 	TypeBool   DataType = 11
 	TypeString DataType = 12
@@ -49,8 +56,22 @@ const (
 
 func (d *DataType) String() string {
 	switch *d {
-	case TypeInt:
+	case TypeInt8:
+		return "TypeInt8"
+	case TypeInt16:
 		return "TypeInt"
+	case TypeInt32:
+		return "TypeInt32"
+	case TypeInt64:
+		return "TypeInt64"
+	case TypeUInt8:
+		return "TypeUInt8"
+	case TypeUInt16:
+		return "TypeUInt"
+	case TypeUInt32:
+		return "TypeUInt32"
+	case TypeUInt64:
+		return "TypeUInt64"
 	case TypeFloat:
 		return "TypeFloat"
 	case TypeBool:

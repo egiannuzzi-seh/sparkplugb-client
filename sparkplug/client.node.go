@@ -94,7 +94,7 @@ func (c *ClientNode) Connect(bdSeq int) error {
 func GetWillPayload(bdSeq int) ([]byte, error) {
 	m := Metric{
 		Name:     "bdSeq",
-		DataType: TypeInt,
+		DataType: TypeInt32,
 		Value:    strconv.Itoa(bdSeq),
 	}
 	ms := []Metric{}
@@ -158,7 +158,7 @@ func (c *ClientNode) sendNodePayload(messageType string, metrics []Metric) error
 
 		m2 := Metric{
 			Name:     "bdSeq",
-			DataType: TypeInt,
+			DataType: TypeInt32,
 			Value:    strconv.Itoa(c.bdSeq),
 		}
 		p.Metrics = append(p.Metrics, m2)

@@ -32,12 +32,13 @@ type ClientNode struct {
 }
 
 type Config struct {
-	ServerUrl string
-	Username  string
-	Password  string
-	ClientID  string
-	GroupID   string
-	NodeID    string
+	ServerUrl  string
+	ServerPort int
+	Username   string
+	Password   string
+	ClientID   string
+	GroupID    string
+	NodeID     string
 }
 
 // Connect will connect to the MQTT broker
@@ -49,7 +50,7 @@ func (c *ClientNode) Connect(bdSeq int) error {
 
 	opts := mqtt.NewClientOptions()
 	// Set the connection parameters
-	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", c.Config.ServerUrl, 1883))
+	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", c.Config.ServerUrl, c.Config.ServerPort))
 	opts.SetClientID(c.Config.ClientID)
 	opts.SetUsername(c.Config.Username)
 	opts.SetPassword(c.Config.Password)

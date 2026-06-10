@@ -52,6 +52,7 @@ const (
 	TypeFloat  DataType = 9
 	TypeBool   DataType = 11
 	TypeString DataType = 12
+	TypeBytes  DataType = 17
 )
 
 func (d *DataType) String() string {
@@ -78,6 +79,8 @@ func (d *DataType) String() string {
 		return "TypeBool"
 	case TypeString:
 		return "TypeString"
+	case TypeBytes:
+		return "TypeBytes"
 	}
 
 	fmt.Println(int(d.toUint32()))

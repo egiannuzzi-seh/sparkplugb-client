@@ -164,6 +164,9 @@ func (p *Payload) EncodePayload(isDeathPayload bool) ([]byte, error) {
 
 		case TypeString:
 			sm.Value = &sproto.Payload_Metric_StringValue{StringValue: m.Value}
+
+		case TypeBytes:
+			sm.Value = &sproto.Payload_Metric_BytesValue{BytesValue: []byte(m.Value)}
 		}
 
 		ms = append(ms, sm)
@@ -222,6 +225,8 @@ func (p *Payload) DecodePayload(bytes []byte) error {
 			p.Metrics[i].Value = strconv.FormatBool(pm.GetBooleanValue())
 		case TypeString:
 			p.Metrics[i].Value = pm.GetStringValue()
+		case TypeBytes:
+			p.Metrics[i].Value = string(pm.GetBytesValue())
 		}
 	}
 	return nil

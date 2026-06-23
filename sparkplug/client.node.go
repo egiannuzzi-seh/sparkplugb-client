@@ -14,7 +14,10 @@ Copyright (c) 2023 Winsonic Electronics, Taiwan
 package sparkplug
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"os"
 	"strconv"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -39,6 +42,8 @@ type Config struct {
 	ClientID   string
 	GroupID    string
 	NodeID     string
+	UseTLS     bool
+	CACertPath string
 }
 
 // Connect will connect to the MQTT broker
@@ -50,7 +55,17 @@ func (c *ClientNode) Connect(bdSeq int) error {
 
 	opts := mqtt.NewClientOptions()
 	// Set the connection parameters
-	opts.AddBroker(fmt.Sprintf("tcp://%s:%d", c.Config.ServerUrl, c.Config.ServerPort))
+	scheme := "tcp"
+	if c.Config.UseTLS {
+		tlsConfig, err := c.newTLSConfig()
+		if err != nil {
+			fmt.Println("Error configuring TLS: ", err)
+			return err
+		}
+		opts.SetTLSConfig(tlsConfig)
+		scheme = "ssl"
+	}
+	opts.AddBroker(fmt.Sprintf("%s://%s:%d", scheme, c.Config.ServerUrl, c.Config.ServerPort))
 	opts.SetClientID(c.Config.ClientID)
 	opts.SetUsername(c.Config.Username)
 	opts.SetPassword(c.Config.Password)
@@ -89,6 +104,24 @@ func (c *ClientNode) Connect(bdSeq int) error {
 	// Subscribe to receive NCMD messages
 	c.subscribeNCMD()
 	return nil
+}
+
+func (c *ClientNode) newTLSConfig() (*tls.Config, error) {
+	tlsConfig := &tls.Config{}
+
+	if c.Config.CACertPath != "" {
+		caCert, err := os.ReadFile(c.Config.CACertPath)
+		if err != nil {
+			return nil, err
+		}
+		caCertPool := x509.NewCertPool()
+		if !caCertPool.AppendCertsFromPEM(caCert) {
+			return nil, fmt.Errorf("failed to append CA certificate from %s", c.Config.CACertPath)
+		}
+		tlsConfig.RootCAs = caCertPool
+	}
+
+	return tlsConfig, nil
 }
 
 // GetWillPayload will return the formatted payload with a single metric "bdSeq"
